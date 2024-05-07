@@ -1,5 +1,5 @@
 from django.db import models
-
+from  Users.models import  User
 STATECHOICE=(
     ('draft','Draft'),
     ('paid','Paid'),
@@ -7,12 +7,9 @@ STATECHOICE=(
 )
 
 class Units(models.Model):
-
     Title = models.CharField(max_length=150)
 
 class Categories(models.Model):
-
-    CategoryId = models.CharField(max_length=150)
     Title = models.CharField(max_length=250)
 
 
@@ -41,7 +38,7 @@ class Cart(models.Model):
     State = models.CharField(max_length=150,choices=STATECHOICE,default='draft')
     CustomerName = models.CharField(max_length=150)
     phoneNumber = models.CharField(max_length=25)
-    UserId = models.IntegerField()
+    UserId = models.ForeignKey(User,on_delete=models.CASCADE)
 
 
 

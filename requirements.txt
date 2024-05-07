@@ -1,0 +1,6 @@
+Django
+djangorestframework
+djangorestframework-simplejwt
+requests
+django-otp
+django-otp-yubikey
