@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django_otp.plugins.otp_hotp',
     'django_otp.plugins.otp_static',
     'Users',
+    'address',
     'Products',
 ]
 

@@ -1,14 +1,15 @@
 from rest_framework.views import APIView
-from  rest_framework.response import Response
-from  rest_framework import  status
+from rest_framework.response import Response
+from rest_framework import status
 from rest_framework.authtoken.models import Token
 
-from  django_otp.plugins.otp_totp.models import  TOTPDevice
+from django_otp.plugins.otp_totp.models import TOTPDevice
 from django_otp.oath import TOTP
 
-from  Users.serializer import RegisterUserSerializer,ValidateUserserializer,ResendOtpSerializer,LoginSerializer , UrlSerializer
-from  Users.models import User,Rols
+from Users.serializer import RegisterUserSerializer, ValidateUserserializer, ResendOtpSerializer, LoginSerializer, UrlSerializer
+from Users.models import User, Rols
 from shop import settings
+from shop import error_list
 
 import  os
 
@@ -38,7 +39,7 @@ class RegisterUser(APIView):
         serializer = RegisterUserSerializer(data=data)
         if not serializer.is_valid():
             self.RETURNDATA['Success'] = False
-            self.RETURNDATA['date'] = 'invalid json'
+            self.RETURNDATA['date'] = error_list[208]
             self.RETURNDATA['code'] = 400
             return Response(data=self.RETURNDATA, status=status.HTTP_400_BAD_REQUEST)
         data = serializer.validated_data
@@ -46,7 +47,7 @@ class RegisterUser(APIView):
         checkuser = User.objects.filter(PhoneNumber=data['PhoneNumber'], state='validated').first()
         if checkuser:
             self.RETURNDATA['Success'] = False
-            self.RETURNDATA['date'] = 'phone number is repited'
+            self.RETURNDATA['date'] = error_list[201]
             self.RETURNDATA['code'] = 400
             return Response(data=self.RETURNDATA, status=status.HTTP_400_BAD_REQUEST)
 
@@ -70,7 +71,7 @@ class RegisterUser(APIView):
         serializer = ValidateUserserializer(data=data)
         if not  serializer.is_valid():
             self.RETURNDATA['Success'] = False
-            self.RETURNDATA['date'] = 'vorodi valid nist'
+            self.RETURNDATA['date'] = error_list[208]
             self.RETURNDATA['code'] = 400
             return Response(self.RETURNDATA, status.HTTP_400_BAD_REQUEST)
 
@@ -81,14 +82,14 @@ class RegisterUser(APIView):
         device = TOTPDevice.objects.filter(key=device_key).first()
         if not device:
             self.RETURNDATA['Success'] = False
-            self.RETURNDATA['date'] = 'user not valid'
+            self.RETURNDATA['date'] = error_list[205]
             self.RETURNDATA['code'] = 400
             return  Response(self.RETURNDATA,status.HTTP_400_BAD_REQUEST)
 
         validation = device.verify_token(otp_token)
         if not validation:
             self.RETURNDATA['Success'] = False
-            self.RETURNDATA['date'] = 'token not valid'
+            self.RETURNDATA['date'] = error_list[207]
             self.RETURNDATA['code'] = 400
             return  Response(self.RETURNDATA,status.HTTP_400_BAD_REQUEST)
 
@@ -111,14 +112,14 @@ class RegisterUser(APIView):
 
         if not  serializer.is_valid():
             self.RETURNDATA['Success'] = False
-            self.RETURNDATA['date'] = 'vorodi valid nist'
+            self.RETURNDATA['date'] = error_list[208]
             self.RETURNDATA['code'] = 400
             return Response(self.RETURNDATA, status.HTTP_400_BAD_REQUEST)
 
         user_name = User.objects.filter(PhoneNumber=request.GET.get('PhoneNumber')).order_by('id').last()
         if not  user_name:
             self.RETURNDATA['Success'] = False
-            self.RETURNDATA['date'] = 'user not have'
+            self.RETURNDATA['date'] = error_list[209]
             self.RETURNDATA['code'] = 400
             return Response(self.RETURNDATA, status.HTTP_400_BAD_REQUEST)
 
@@ -142,7 +143,7 @@ class Login(APIView):
         serializer = LoginSerializer(data=data)
         if not serializer.is_valid():
             self.RETURNDATA['Success'] = False
-            self.RETURNDATA['date'] = serializer.error_messages
+            self.RETURNDATA['date'] = error_list[208]
             self.RETURNDATA['code'] = 400
             return Response(data=self.RETURNDATA, status=status.HTTP_400_BAD_REQUEST)
 
@@ -150,7 +151,7 @@ class Login(APIView):
             user = User.objects.get(PhoneNumber=data['PhoneNumber'],password=data['password'],state = VALIDSTATE)
         except:
             self.RETURNDATA['Success'] = False
-            self.RETURNDATA['date'] = 'password and phoneNumber is not valid'
+            self.RETURNDATA['date'] = error_list[202]
             self.RETURNDATA['code'] = 400
             return Response(data=self.RETURNDATA, status=status.HTTP_400_BAD_REQUEST)
 
@@ -184,22 +185,22 @@ class ResetPassword(APIView):
         serializer = ResendOtpSerializer(data=data)
         if not serializer.is_valid():
             self.RETURNDATA['Success'] = False
-            self.RETURNDATA['date'] = serializer.error_messages
+            self.RETURNDATA['date'] = error_list[208]
             self.RETURNDATA['code'] = 400
             return Response(data=self.RETURNDATA, status=status.HTTP_400_BAD_REQUEST)
-        # try:
+
         user = User.objects.filter(PhoneNumber=data['PhoneNumber']).first()
         if not user:
             self.RETURNDATA['Success'] = False
-            self.RETURNDATA['date'] = 'not user'
+            self.RETURNDATA['date'] = error_list[209]
             self.RETURNDATA['code'] = 400
             return Response(data=self.RETURNDATA, status=status.HTTP_400_BAD_REQUEST)
 
-        otp_code , device = self._create_deviceOtp(user)
-        url = os.path.join(settings.DEPLOY_HOST,'user',str(device.key),str(otp_code))
+        otp_code, device = self._create_deviceOtp(user)
+        url = os.path.join(settings.DEPLOY_HOST, 'user', str(device.key), str(otp_code))
 
         print(url)
-        # send sms
+
 
         self.RETURNDATA['date'] = None
         self.RETURNDATA['code'] = 200
@@ -223,20 +224,20 @@ class ResetPasswordUrl(APIView):
         serializer = UrlSerializer(data=data)
         if not serializer.is_valid():
             self.RETURNDATA['Success'] = False
-            self.RETURNDATA['date'] = 'vordi not valid'
+            self.RETURNDATA['date'] = error_list[208]
             self.RETURNDATA['code'] = 400
             return Response(data=self.RETURNDATA, status=status.HTTP_400_BAD_REQUEST)
 
         device = TOTPDevice.objects.filter(key=token).first()
         if not device:
             self.RETURNDATA['Success'] = False
-            self.RETURNDATA['date'] = 'not user'
+            self.RETURNDATA['date'] = error_list[209]
             self.RETURNDATA['code'] = 400
             return Response(data=self.RETURNDATA, status=status.HTTP_400_BAD_REQUEST)
         validate = device.verify_token(otp)
         if not validate:
             self.RETURNDATA['Success'] = False
-            self.RETURNDATA['date'] = 'link not vlid'
+            self.RETURNDATA['date'] = error_list[207]
             self.RETURNDATA['code'] = 400
             return Response(data=self.RETURNDATA, status=status.HTTP_400_BAD_REQUEST)
         user = device.user

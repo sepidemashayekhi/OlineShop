@@ -11,15 +11,16 @@ class Rols(models.Model):
 
 
 STATECHOICE = (
-    ('nv','not_validated')
+    ('nv', 'not_validated')
     ,('v', 'validated')
 )
 class User (AbstractUser):
-    username = models.CharField(null=True,max_length=15)
-    RoleId = models.ForeignKey(Rols,on_delete=models.CASCADE,null=True)
+    username = models.CharField(null=True, max_length=15)
+    RoleId = models.ForeignKey(Rols, on_delete=models.CASCADE, null=True)
     PhoneNumber = models.CharField(max_length=14)
     Address = models.TextField()
-    state = models.CharField(max_length=15,choices=STATECHOICE)
+    state = models.CharField(max_length=15, choices=STATECHOICE)
+    Birthday = models.DateField(null=True, default=None)
 
     USERNAME_FIELD = 'id'
     REQUIRED_FIELDS = ['email', ]

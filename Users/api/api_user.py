@@ -1,17 +1,19 @@
 from  rest_framework.views import  APIView
 from rest_framework.response import Response
-from  rest_framework import status
+from rest_framework import status
 from rest_framework.authtoken.models import Token
 
-from  django_otp.plugins.otp_totp.models import  TOTPDevice
+from django_otp.plugins.otp_totp.models import TOTPDevice
 from django_otp.oath import TOTP
 
 
-from Users.serializer import LoginUserSerializer ,ValidateUserserializer
-from  Users.models import User
+from Users.serializer import LoginUserSerializer, ValidateUserserializer
+from Users.models import User
+from shop import error_list
 
 
 CUSTOMEROLE = 2
+
 class LoginRegisterUser(APIView):
     RETURNDATA = {
         'Success': True
@@ -33,7 +35,7 @@ class LoginRegisterUser(APIView):
         serializer = LoginUserSerializer(data=data)
         if  not serializer.is_valid():
             self.RETURNDATA['Success'] = False
-            self.RETURNDATA['date'] = 'phonr number not valid '
+            self.RETURNDATA['date'] = error_list[10]
             self.RETURNDATA['code'] = 400
             return Response(self.RETURNDATA, status.HTTP_400_BAD_REQUEST)
 
@@ -61,26 +63,26 @@ class ValidateUser(APIView):
         , 'code': 200
     }
 
-    def post(self,request):
+    def post(self, request):
         data = request.data
         serializer = ValidateUserserializer(data=data)
         if not serializer.is_valid():
             self.RETURNDATA['Success'] = False
-            self.RETURNDATA['date'] = 'otp not valid '
+            self.RETURNDATA['date'] = error_list[208]
             self.RETURNDATA['code'] = 400
             return Response(self.RETURNDATA, status.HTTP_400_BAD_REQUEST)
 
         device = TOTPDevice.objects.filter(key=data.get('key')).first()
         if not device:
             self.RETURNDATA['Success'] = False
-            self.RETURNDATA['date'] = 'device not valid '
+            self.RETURNDATA['date'] = error_list[207]
             self.RETURNDATA['code'] = 400
             return Response(self.RETURNDATA, status.HTTP_400_BAD_REQUEST)
 
         validate = device.verify_token(data['otp'])
         if not  validate:
             self.RETURNDATA['Success'] = False
-            self.RETURNDATA['date'] = 'otp monghazi not valid '
+            self.RETURNDATA['date'] = error_list[207]
             self.RETURNDATA['code'] = 400
             return Response(self.RETURNDATA, status.HTTP_400_BAD_REQUEST)
 
